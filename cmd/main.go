@@ -11,6 +11,7 @@ func main() {
 
 	config.ConnectDatabase()
 	routes.RegisterProductRoutes(r)
+	routes.RegisterCategoryRoutes(r)
 
 	r.Run(":8080")
 }
