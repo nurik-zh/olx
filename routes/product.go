@@ -5,7 +5,16 @@ import (
 	"net/http"
 	"olxkz/config"
 	"olxkz/models"
+	"strconv"
 )
+
+func toInt(s string) int {
+	i, err := strconv.Atoi(s)
+	if err != nil {
+		return 100
+	}
+	return i
+}
 
 func RegisterProductRoutes(r *gin.Engine) {
 	r.GET("/products", GetProducts)
@@ -16,7 +25,34 @@ func RegisterProductRoutes(r *gin.Engine) {
 
 func GetProducts(c *gin.Context) {
 	var products []models.Product
-	config.DB.Find(&products)
+
+	// Получение query параметров
+	categoryID := c.Query("category_id")
+	limitParam := c.DefaultQuery("limit", "10")
+	pageParam := c.DefaultQuery("page", "1")
+
+	limit := toInt(limitParam)
+	page := toInt(pageParam)
+
+	if limit <= 0 {
+		limit = 2
+	}
+	if page <= 0 {
+		page = 1
+	}
+
+	offset := (page - 1) * limit
+
+	query := config.DB
+
+	// Фильтрация по категории
+	if categoryID != "" {
+		query = query.Where("category_id = ?", categoryID)
+	}
+
+	// Применение лимита и offset (пагинация)
+	query = query.Limit(limit).Offset(offset).Find(&products)
+
 	c.JSON(http.StatusOK, products)
 }
 
