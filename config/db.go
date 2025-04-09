@@ -21,5 +21,5 @@ func ConnectDatabase() {
 	fmt.Println("База данных подключена!")
 
 	// ✅ Используем models.Product
-	db.AutoMigrate(&models.Product{})
+	db.AutoMigrate(&models.Product{}, &models.Category{})
 }
